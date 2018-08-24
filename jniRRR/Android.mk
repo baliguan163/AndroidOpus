@@ -33,24 +33,23 @@ LOCAL_CFLAGS        += -Drestrict='' -D__EMX__ -DOPUS_BUILD -DUSE_ALLOCA -DHAVE_
 LOCAL_CPPFLAGS      := -DBSD=1
 LOCAL_CPPFLAGS      += -ffast-math -O3 -funroll-loops
 
-include $(BUILD_SHARED_LIBRARY)
-#LOCAL_PRELINK_MODULE := false
-#include $(BUILD_STATIC_LIBRARY)
-#
-#include $(CLEAR_VARS)
-#
-#LOCAL_MODULE := myopus
-#LOCAL_C_INCLUDES += \
-#    $(JNI_H_INCLUDE) \
-#    $(MY_MODULE_DIR) \
-#    
-#LOCAL_SRC_FILES := opusmain.c
-#LOCAL_LDLIBS := -L$(SYSROOT)/usr/lib -llog
-#
-#LOCAL_STATIC_LIBRARIES := opus
-#LOCAL_PRELINK_MODULE := false
-#
 #include $(BUILD_SHARED_LIBRARY)
+LOCAL_PRELINK_MODULE := false
+include $(BUILD_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := myopus
+LOCAL_C_INCLUDES += \
+    $(JNI_H_INCLUDE) \
+    $(MY_MODULE_DIR) \
+    
+LOCAL_SRC_FILES := opus_tool.c
+LOCAL_LDLIBS := -L$(SYSROOT)/usr/lib -llog
+
+LOCAL_STATIC_LIBRARIES := opus
+LOCAL_PRELINK_MODULE := false
+include $(BUILD_SHARED_LIBRARY)
 
 
 

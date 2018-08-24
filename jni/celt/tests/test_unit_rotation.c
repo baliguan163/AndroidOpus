@@ -37,12 +37,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "vq.h"
+#include "vq.c"
+#include "cwrs.c"
+#include "entcode.c"
+#include "entenc.c"
+#include "entdec.c"
+#include "mathops.c"
 #include "bands.h"
-#include "stack_alloc.h"
 #include <math.h>
-
-
 #define MAX_SIZE 100
 
 int ret=0;

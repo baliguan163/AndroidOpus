@@ -31,13 +31,11 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include "main_FIX.h"
 
-#if defined(MIPSr1_ASM)
-#include "mips/warped_autocorrelation_FIX_mipsr1.h"
-#endif
-
+#define QC  10
+#define QS  14
 
 /* Autocorrelations for a warped frequency axis */
-void silk_warped_autocorrelation_FIX_c(
+void silk_warped_autocorrelation_FIX(
           opus_int32                *corr,                                  /* O    Result [order + 1]                                                          */
           opus_int                  *scale,                                 /* O    Scaling of the correlation vector                                           */
     const opus_int16                *input,                                 /* I    Input data to correlate                                                     */

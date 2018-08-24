@@ -75,7 +75,7 @@ int opus_multistream_decoder_init(
    char *ptr;
 
    if ((channels>255) || (channels<1) || (coupled_streams>streams) ||
-       (streams<1) || (coupled_streams<0) || (streams>255-coupled_streams))
+       (coupled_streams+streams>255) || (streams<1) || (coupled_streams<0))
       return OPUS_BAD_ARG;
 
    st->layout.nb_channels = channels;
@@ -119,7 +119,7 @@ OpusMSDecoder *opus_multistream_decoder_create(
    int ret;
    OpusMSDecoder *st;
    if ((channels>255) || (channels<1) || (coupled_streams>streams) ||
-       (streams<1) || (coupled_streams<0) || (streams>255-coupled_streams))
+       (coupled_streams+streams>255) || (streams<1) || (coupled_streams<0))
    {
       if (error)
          *error = OPUS_BAD_ARG;
@@ -237,8 +237,7 @@ static int opus_multistream_decode_native(
    for (s=0;s<st->layout.nb_streams;s++)
    {
       OpusDecoder *dec;
-      opus_int32 packet_offset;
-      int ret;
+      int packet_offset, ret;
 
       dec = (OpusDecoder*)ptr;
       ptr += (s < st->layout.nb_coupled_streams) ? align(coupled_size) : align(mono_size);
@@ -426,7 +425,6 @@ int opus_multistream_decoder_ctl(OpusMSDecoder *st, int request, ...)
        case OPUS_GET_SAMPLE_RATE_REQUEST:
        case OPUS_GET_GAIN_REQUEST:
        case OPUS_GET_LAST_PACKET_DURATION_REQUEST:
-       case OPUS_GET_PHASE_INVERSION_DISABLED_REQUEST:
        {
           OpusDecoder *dec;
           /* For int32* GET params, just query the first stream */
@@ -501,7 +499,6 @@ int opus_multistream_decoder_ctl(OpusMSDecoder *st, int request, ...)
        }
        break;
        case OPUS_SET_GAIN_REQUEST:
-       case OPUS_SET_PHASE_INVERSION_DISABLED_REQUEST:
        {
           int s;
           /* This works for int32 params */

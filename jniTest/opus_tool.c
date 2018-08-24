@@ -9,12 +9,81 @@
 #include "opus_multistream.h"  
   
 #define SAMPLE_RATE 16000  
-#define CHANNEL_NUM 1  
+#define CHANNEL_NUM  1
 #define BIT_RATE 16000  
 #define BIT_PER_SAMPLE 16  
+
 #define WB_FRAME_SIZE 320  
 #define DATA_SIZE 1024 * 1024 * 4  
+
+int make_wav_header(FILE *out, int len) {
+    int size = 0;
+    int *sz = &size;
+    int number;
+    int * nm = &number;
   
+    // RIFF  4 bytes
+    fseek(out, 0, SEEK_SET);
+    fputs("RIFF", out);
+
+    // len   4 bytes
+    len = (len + 44 - 8);
+    fwrite(&len, 2, 1, out);
+    number = 0;
+    fwrite(nm, 2, 1, out);
+
+    // WAVE  4 bytes  + "fmt " 4 bytes
+    fputs("WAVEfmt ", out);
+
+    // size1   4 bytes 一般情况下Size为16，如果为18则最后多了2个字节的附加信息
+    number = 16;
+    fwrite(nm, 2, 1, out);
+    number = 0;
+    fwrite(nm, 2, 1, out);
+
+    // format tag  2 bytes
+    number = 1;//编码方式
+    fwrite(nm, 2, 1, out);
+
+    // channel    2 bytes
+    number = CHANNEL_NUM;//1 //1为单通道，2为双通道
+    fwrite(nm, 2, 1, out);
+
+    // sample rate  4 bytes //=16KHz
+    number = SAMPLE_RATE;//16000
+    fwrite(nm, 2, 1, out);
+    number = 0;
+    fwrite(nm, 2, 1, out);
+
+    //byte per seconds   4 bytes //每秒所需字节数
+    //number = 22664;
+    number = CHANNEL_NUM * SAMPLE_RATE * BIT_PER_SAMPLE / 8
+    fwrite(nm, 2, 1, out);
+    number = 0;
+    fwrite(nm, 2, 1, out);
+
+    // block align   2 bytes  //一个采样的字节数
+    number = CHANNEL_NUM * BIT_PER_SAMPLE / 8;
+    fwrite(nm, 2, 1, out);
+
+    //bitPerSample   2 bytes 16位，即设置PCM的方式为16位立体声(双通道)
+    number = 16;
+    fwrite(nm, 2, 1, out);
+
+    //"data"      4 bytes
+    fputs("data", out);
+
+    // size2    4 bytes  //数据的长度
+//    size = (size - 36);
+    size = len;
+    fwrite(sz, 2, 1, out);
+    number = 0;
+    fwrite(nm, 2, 1, out);
+    return 0;
+}
+
+
+
 int encode(char* in, int len, unsigned char* opus, int* opus_len) {  
     int err = 0;  
     opus_int32 skip = 0;  
@@ -131,70 +200,7 @@ int encode_wav_file(char *in_file_path, char *out_file_path) {
     return len;  
 }  
   
-int make_wav_header(FILE *out, int len) {  
-    int size = 0;  
-    int *sz = &size;  
-    int number;  
-    int * nm = &number;  
   
-    // RIFF  4 bytes  
-    fseek(out, 0, SEEK_SET);  
-    fputs("RIFF", out);  
-  
-    // len   4 bytes  
-    len = (len + 44 - 8);  
-    fwrite(&len, 2, 1, out);  
-    number = 0;  
-    fwrite(nm, 2, 1, out);  
-  
-    // WAVE  4 bytes  + "fmt " 4 bytes  
-    fputs("WAVEfmt ", out);  
-  
-    // size1   4 bytes  
-    number = 16;  
-    fwrite(nm, 2, 1, out);  
-    number = 0;  
-    fwrite(nm, 2, 1, out);  
-  
-    // format tag       2 bytes  
-    number = 1;  
-    fwrite(nm, 2, 1, out);  
-  
-    // channel    2 bytes  
-    number = CHANNEL_NUM;  
-    fwrite(nm, 2, 1, out);  
-  
-    // sample rate          4 bytes  
-    number = SAMPLE_RATE;  
-    fwrite(nm, 2, 1, out);  
-    number = 0;  
-    fwrite(nm, 2, 1, out);  
-  
-    //byte per seconds   4 bytes  
-    number = 22664;  
-    fwrite(nm, 2, 1, out);  
-    number = 0;  
-    fwrite(nm, 2, 1, out);  
-  
-    // block align   2 bytes  
-    number = CHANNEL_NUM * BIT_PER_SAMPLE / 8;  
-    fwrite(nm, 2, 1, out);  
-  
-    // bitPerSample   2 bytes  
-    number = 16;  
-    fwrite(nm, 2, 1, out);  
-  
-    // "data"      4 bytes  
-    fputs("data", out);  
-  
-    // size2    4 bytes  
-    size = (size - 36);  
-    fwrite(sz, 2, 1, out);  
-    number = 0;  
-    fwrite(nm, 2, 1, out);  
-  
-    return 0;  
-}  
   
 int decode_opus_file(char *in_file_path, char *out_file_path) {  
     printf("%s\n", in_file_path);  
